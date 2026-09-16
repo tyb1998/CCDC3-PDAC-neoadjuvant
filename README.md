@@ -1,52 +1,27 @@
-# CCDC3 and neoadjuvant treated pancreatic cancer
+# CCDC3 in treated pancreatic ductal adenocarcinoma: reproducibility audit
 
-This repository is being assembled for the CCDC3 PDAC manuscript. The input
-libraries were generated from frozen tissue using single nucleus RNA sequencing.
-The two manuscript samples are P1302539 and P1368090.
+This repository contains reconstructed analysis scripts for the manuscript. Scripts were checked against the original two in-house **single-nucleus** count matrices and retained Figure 4/5 intermediate tables. Original exploratory scripts, genomic-bin coordinates, doublet scores and six external cohort analysis objects have not been recovered. This is a reproducibility audit of specified results, not a claim that every figure can be regenerated from this repository.
 
-## Verified matrix audit
+## Inputs and commands
 
-`scripts/01_matrix_qc.py` reads the filtered gene by nucleus matrices exported
-by CeleScope 2.7.3. It checks matrix dimensions against the feature and barcode
-files and calculates UMI counts, detected genes and mitochondrial transcript
-percentages per nucleus. It does not repeat FASTQ processing, call doublets,
-filter nuclei, integrate samples, annotate cell types or regenerate manuscript
-figures. These steps require separate, validated code before the repository can
-be described as the complete source code for the paper.
-
-Place the three files for each sample in `data/P1302539` and `data/P1368090`:
-`matrix.mtx.gz`, `features.tsv.gz`, `barcodes.tsv.gz`. Run from the repository root:
+Create a local environment with `python -m pip install -r requirements.txt`. Obtain input files separately; do not put patient-level records or human FASTQ in this repository. The two input matrix directories contain `matrix.mtx.gz`, `features.tsv.gz` and `barcodes.tsv.gz` from CeleScope. The annotation CSV is a saved output from the original analysis, **not** independently recreated here. The trial CSV is a 21-patient previously processed expression/clinical table; the spatial parquet is previously processed expression for 39 patients.
 
 ```bash
-python -m pip install -r requirements.txt
-python scripts/01_matrix_qc.py --sample P1302539=data/P1302539 \
-  --sample P1368090=data/P1368090 --output qc_audit
+python scripts/01_matrix_qc.py --sample P1302539=data/P1302539 --sample P1368090=data/P1368090 --output audit/qc
+python scripts/02_figure5_descriptive.py --annotation data/Figure5_PDAC_only_cell_metadata.csv.gz --p1302539 data/P1302539 --p1368090 data/P1368090 --output audit/figure5
+python scripts/03_figure4_patient_correlations.py --trial data/Figure4_trial_residual_disease_scores.csv --spatial data/Figure4_spatial_patient_expression.parquet --output audit/figure4
+python scripts/04_figure1_trial_survival.py --trial data/Figure4_trial_residual_disease_scores.csv --output audit/figure1
 ```
 
-The verified input dimensions are 38,606 features by 9,996 called nuclei for
-P1302539 and 38,606 by 8,161 for P1368090 (18,157 nuclei total). These are
-the matrices produced by the facility before the manuscript's downstream QC.
-The 18,021 nucleus final atlas is not reproduced by this script.
+## Checks performed
 
-## Descriptive Figure 5 audit
+- `01`: input dimensions 38,606 genes × 9,996 nuclei (P1302539) and 38,606 × 8,161 (P1368090); per-nucleus QC from the *facility-filtered* matrices, not raw FASTQ.
+- `02`: retained 9,934 and 8,087 nuclei using the saved annotation; malignant fractions 4.47% and 65.25%. **Pre-downstream-filtering** pseudobulk CCDC3 is 110.4248 vs 18.2627 CPM; **post-filtering, within-malignant** CCNE1 is 3.67896 vs 19.06836 CPM and PLK1 is 7.35792 vs 17.33195 CPM. Cell type pseudobulk CPM is summed gene UMIs divided by summed all-gene UMIs × 10^6, not the arithmetic average of per-cell CPM. The script outputs both measures explicitly; the original figure used pseudobulk. Cycling fractions derive from existing `manual_cell_state` annotation.
+- `03`: trial unadjusted Spearman relationships and spatial CCDC3 correlations with CCNE1 (rho −0.45891, P 0.00330) and PKMYT1 (rho −0.54271, P 0.000358) match the manuscript. Our specified rank-residual partial Spearman correlations for some trial genes differ from the manuscript's reported partial coefficients; the original adjustment code was unavailable. Review these numbers before using them in the text.
+- `04`: 21 trial patients, 15 DFS events; CAP rho −0.50301, asymptotic P 0.02011. A seeded, two-sided 100,000-permutation estimate is also printed separately. Cox HR and CI use a **sample-standard-deviation** unit; small differences from original software/settings must be reported rather than concealed.
 
-`scripts/02_figure5_descriptive.py` joins the original count matrices to the
-previously saved 18,021 nucleus annotation file. It verifies that P1302539
-contains 9,934 retained nuclei (62 fewer than its input matrix) and P1368090
-contains 8,087 (74 fewer). It calculates cell type proportions and the mean
-CPM and detection fractions of CCDC3, CCNE1 and PLK1 for each cell type. Its
-output reproduces the reported malignant nucleus fractions of about 4.47% and
-65.25%. Gene CPM estimates can differ slightly from values in an earlier figure
-if its exact normalization and grouping rules differed.
+## Current limits
 
-The annotation file is an input to this script and is not stored in this
-repository. After obtaining the data from the controlled access archive, run:
+These scripts do not regenerate the original 18-cluster embedding, Scrublet doublet calls, 177-gene classifier, inferCNV-like score, CIN score, Figure 2 cell atlas, Figure 2 spatial spot analyses, Figure 3 six-cohort meta-analysis, or genome-wide candidate selection. We cannot verify original filtering thresholds or the manuscript's classifier accuracy from the saved annotation alone. A patient-level table itself does not independently reproduce its upstream processing from GEO. Supply the original intermediate input objects or regenerate them before claiming full source-code availability or full figure reproducibility.
 
-```bash
-python scripts/02_figure5_descriptive.py \
-  --annotation data/Figure5_PDAC_only_cell_metadata.csv.gz \
-  --p1302539 data/P1302539 --p1368090 data/P1368090 \
-  --output figure5_audit
-```
-
-No patient records, raw FASTQ files or restricted data are stored here.
+Clinical conclusions drawn from the two in-house specimens are descriptive, since each response class contains one patient. The original sequencing data require deposition to an appropriate controlled-access archive; GitHub code alone does not satisfy the data-deposition request.
