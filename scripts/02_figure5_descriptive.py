@@ -52,9 +52,12 @@ def main():
         raise ValueError('The annotation must contain the prefixed nucleus ID in Unnamed: 0')
     genes = ['CCDC3', 'CCNE1', 'PLK1']
     all_rows = []
+    prefilter = []
     for sid, directory in [('P1302539', args.p1302539), ('P1368090', args.p1368090)]:
         barcodes, totals, expr = load_sample(directory, genes)
         patient = sid[1:]
+        prefilter.append({'patient_id': patient, 'n_nuclei': len(barcodes),
+                          'CCDC3_pseudobulk_cpm': 1e6 * expr['CCDC3'].sum() / totals.sum()})
         sample_meta = meta.loc[meta.patient_id == patient].copy()
         sample_meta['barcode'] = sample_meta['Unnamed: 0'].str.replace(
             f'^{patient}_', '', regex=True)
@@ -86,6 +89,28 @@ def main():
             row[f'{gene}_detected_fraction'] = (group[f'{gene}_umi'] > 0).mean()
         metrics.append(row)
     pd.DataFrame(metrics).to_csv(args.output / 'gene_expression_by_celltype.csv', index=False)
+    pd.DataFrame(prefilter).to_csv(args.output / 'ccdc3_prefilter_sample_cpm.csv', index=False)
+    pseudobulk = []
+    for (patient, response, celltype), group in cells.groupby(
+            ['patient_id', 'response', 'manual_broad_celltype'], dropna=False):
+        row = {'patient_id': patient, 'response': response, 'cell_type': celltype,
+               'n_nuclei': len(group)}
+        for gene in genes:
+            # Manuscript Fig. 5 lineage and malignant-gene CPM uses this definition.
+            row[f'{gene}_pseudobulk_cpm'] = (
+                1e6 * group[f'{gene}_umi'].sum() / group['total_umi'].sum())
+            row[f'{gene}_detected_fraction'] = (group[f'{gene}_umi'] > 0).mean()
+        pseudobulk.append(row)
+    pd.DataFrame(pseudobulk).to_csv(args.output / 'gene_pseudobulk_by_celltype.csv', index=False)
+    malignant = cells.loc[cells.manual_broad_celltype == 'Epithelial (malignant)']
+    cycling = (malignant.groupby(['patient_id', 'response'])
+               .agg(malignant_nuclei=('manual_cell_state', 'size'),
+                    cycling_nuclei=('manual_cell_state',
+                                    lambda s: int((s == 'Cycling malignant').sum())))
+               .reset_index())
+    cycling['cycling_fraction_of_malignant'] = (
+        cycling.cycling_nuclei / cycling.malignant_nuclei)
+    cycling.to_csv(args.output / 'malignant_cycling_fraction.csv', index=False)
     print('Retained nuclei:', sample_totals.to_dict(), 'total', len(cells))
 
 
