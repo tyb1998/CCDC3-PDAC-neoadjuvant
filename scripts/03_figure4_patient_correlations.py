@@ -1,11 +1,8 @@
 #!/usr/bin/env python3
-"""Recheck patient-level Figure 4 correlations against retained analysis tables.
+"""Calculate patient-level Figure 4 correlations.
 
-These are intermediate, processed patient-level tables, not raw GEO reads. The
-script validates reported unadjusted correlations and independent spatial
-replication. Partial Spearman uses rank residuals and a covariate-adjusted t
-test (n-3 degrees of freedom); its definition is made explicit to expose any
-differences from the unpublished original workflow.
+Partial Spearman correlations use rank residuals and a covariate-adjusted
+t test with n-3 degrees of freedom.
 """
 import argparse
 from pathlib import Path
