@@ -1,9 +1,5 @@
 #!/usr/bin/env python3
-"""Recalculate descriptive Figure 5 measures from counts and final annotation.
-
-This script uses only the retained barcodes in the supplied annotation file.
-It does not reconstruct the original filtering, clustering or annotation.
-"""
+"""Calculate the descriptive Figure 5 measures from counts and annotations."""
 import argparse
 import csv
 import gzip
@@ -111,7 +107,7 @@ def main():
     cycling['cycling_fraction_of_malignant'] = (
         cycling.cycling_nuclei / cycling.malignant_nuclei)
     cycling.to_csv(args.output / 'malignant_cycling_fraction.csv', index=False)
-    print('Retained nuclei:', sample_totals.to_dict(), 'total', len(cells))
+    print('Analysis nuclei:', sample_totals.to_dict(), 'total', len(cells))
 
 
 if __name__ == '__main__':
