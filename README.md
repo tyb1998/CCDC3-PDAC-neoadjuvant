@@ -19,9 +19,9 @@ the in-house cohort.
   patient-level correlations.
 - `scripts/04_figure1_trial_survival.py`: CAP association, permutation
   analysis, DFS Cox models and leave-one-out analysis.
-- `scripts/05_figure2_source_table_audit.py`: spatial compartment and
+- `scripts/05_figure2_spatial_summary.py`: spatial compartment and
   specificity summaries.
-- `scripts/06_figure3_meta_summary_audit.py`: inverse-variance
+- `scripts/06_figure3_meta_analysis.py`: inverse-variance
   meta-analysis of cohort-specific Cox estimates.
 
 ## Environment
@@ -68,12 +68,12 @@ python scripts/04_figure1_trial_survival.py \
   --trial data/Figure1_trial_patient_response.csv \
   --output results/figure1
 
-python scripts/05_figure2_source_table_audit.py \
+python scripts/05_figure2_spatial_summary.py \
   --compartments data/Figure2_spatial_compartment_source.csv \
   --specificity data/Figure2_spatial_specificity.csv \
   --output results/figure2
 
-python scripts/06_figure3_meta_summary_audit.py \
+python scripts/06_figure3_meta_analysis.py \
   --cohort-cox data/Figure3_cohort_specific_cox.csv \
   --adjusted-meta data/Figure3_adjusted_meta.csv \
   --vascular-meta data/Figure3_vascular_meta.csv \
