@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""Audit filtered CeleScope gene-by-nucleus matrices without applying secondary QC.
+"""Calculate per-sample QC metrics from CeleScope gene-by-nucleus matrices.
 
 Example:
   python scripts/01_matrix_qc.py --sample P1302539=data/P1302539 \
-      --sample P1368090=data/P1368090 --output qc_audit
+      --sample P1368090=data/P1368090 --output results/qc
 """
 import argparse
 import csv
