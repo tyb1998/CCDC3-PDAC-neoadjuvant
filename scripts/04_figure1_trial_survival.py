@@ -1,9 +1,5 @@
 #!/usr/bin/env python3
-"""Recalculate Figure 1 trial CAP/DFS statistics from the 21-patient table.
-
-This reuses a retained, previously processed patient table; it cannot audit
-the original alignment, duplicate block aggregation, or candidate selection.
-"""
+"""Calculate Figure 1 CAP and DFS statistics for the 21-patient trial cohort."""
 import argparse
 from pathlib import Path
 
@@ -72,7 +68,7 @@ def main():
         'definite_residual_p': definite['p'],
         'loo_hr_min': min(leave_one_out), 'loo_hr_max': max(leave_one_out),
     }])
-    result.to_csv(args.output / 'figure1_trial_audit.csv', index=False)
+    result.to_csv(args.output / 'figure1_trial_results.csv', index=False)
     print(result.to_string(index=False))
 
 
