@@ -30,11 +30,16 @@ def main():
     args = parser.parse_args()
     args.output.mkdir(parents=True, exist_ok=True)
     df = pd.read_csv(args.trial)
+    # Accept either the dedicated Figure 1 table or the wider Figure 4 table.
+    if {'ccdc3_z', 'time', 'event', 'response_score'}.issubset(df.columns):
+        df['ccdc3'] = df.ccdc3_z
+        df['dfs_months'] = df.time
+        df['dfs_event'] = df.event
+        df['cap_score'] = df.response_score
     if len(df) != 21 or df.patient.nunique() != 21 or df.dfs_event.sum() != 15:
         raise ValueError('Expected 21 unique trial patients and 15 DFS events')
-    # The archived table carries population-z CCDC3; the reported hazard ratio
-    # uses one sample standard deviation of the original expression (ddof=1).
-    df['ccdc3'] = df.ccdc3 / df.ccdc3.std(ddof=1)
+    # Standardise explicitly using the sample SD, matching the reported unit.
+    df['ccdc3'] = (df.ccdc3 - df.ccdc3.mean()) / df.ccdc3.std(ddof=1)
     cap = spearmanr(df.cap_score, df.ccdc3)
     cap_rank = rankdata(df.cap_score.to_numpy()).astype(float)
     ccdc3_rank = rankdata(df.ccdc3.to_numpy()).astype(float)
