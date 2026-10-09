@@ -35,9 +35,10 @@ python -m pip install -r requirements.txt
 ## Input data
 
 Public datasets used in the manuscript are available under GSE313101,
-GSE202051 and GSE282302. In-house human sequencing data and associated
-processed files are available through the controlled-access repository
-specified in the manuscript Data Availability Statement.
+GSE202051 and GSE282302. The in-house single-nucleus RNA-seq data and
+associated processed files are available through the controlled-access
+NGDC Genome Sequence Archive for Human (GSA-Human) under accession
+`HRA021437`.
 
 For the in-house matrices, each sample directory contains
 `matrix.mtx.gz`, `features.tsv.gz` and `barcodes.tsv.gz`. Figure source
@@ -49,14 +50,14 @@ duplicated in this GitHub repository.
 
 ```bash
 python scripts/01_matrix_qc.py \
-  --sample P1302539=data/P1302539 \
-  --sample P1368090=data/P1368090 \
+  --sample PDAC_NACT_PR_01=data/PDAC_NACT_PR_01 \
+  --sample PDAC_NACT_SD_01=data/PDAC_NACT_SD_01 \
   --output results/qc
 
 python scripts/02_figure5_descriptive.py \
   --annotation data/Figure5_PDAC_only_cell_metadata.csv.gz \
-  --p1302539 data/P1302539 \
-  --p1368090 data/P1368090 \
+  --pr-sample data/PDAC_NACT_PR_01 \
+  --sd-sample data/PDAC_NACT_SD_01 \
   --output results/figure5
 
 python scripts/03_figure4_patient_correlations.py \

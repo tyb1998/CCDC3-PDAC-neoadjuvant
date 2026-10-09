@@ -2,8 +2,10 @@
 """Calculate per-sample QC metrics from CeleScope gene-by-nucleus matrices.
 
 Example:
-  python scripts/01_matrix_qc.py --sample P1302539=data/P1302539 \
-      --sample P1368090=data/P1368090 --output results/qc
+  python scripts/01_matrix_qc.py \
+      --sample PDAC_NACT_PR_01=data/PDAC_NACT_PR_01 \
+      --sample PDAC_NACT_SD_01=data/PDAC_NACT_SD_01 \
+      --output results/qc
 """
 import argparse
 import csv

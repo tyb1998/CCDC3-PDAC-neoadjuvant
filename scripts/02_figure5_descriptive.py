@@ -38,8 +38,10 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--annotation', required=True, type=Path,
                         help='Figure5_PDAC_only_cell_metadata.csv.gz')
-    parser.add_argument('--p1302539', required=True, type=Path)
-    parser.add_argument('--p1368090', required=True, type=Path)
+    parser.add_argument('--pr-sample', required=True, type=Path,
+                        help='Matrix directory for PDAC_NACT_PR_01')
+    parser.add_argument('--sd-sample', required=True, type=Path,
+                        help='Matrix directory for PDAC_NACT_SD_01')
     parser.add_argument('--output', required=True, type=Path)
     args = parser.parse_args()
     args.output.mkdir(parents=True, exist_ok=True)
@@ -49,9 +51,10 @@ def main():
     genes = ['CCDC3', 'CCNE1', 'PLK1']
     all_rows = []
     prefilter = []
-    for sid, directory in [('P1302539', args.p1302539), ('P1368090', args.p1368090)]:
+    for sid, directory in [('PDAC_NACT_PR_01', args.pr_sample),
+                           ('PDAC_NACT_SD_01', args.sd_sample)]:
         barcodes, totals, expr = load_sample(directory, genes)
-        patient = sid[1:]
+        patient = sid
         prefilter.append({'patient_id': patient, 'n_nuclei': len(barcodes),
                           'CCDC3_pseudobulk_cpm': 1e6 * expr['CCDC3'].sum() / totals.sum()})
         sample_meta = meta.loc[meta.patient_id == patient].copy()
